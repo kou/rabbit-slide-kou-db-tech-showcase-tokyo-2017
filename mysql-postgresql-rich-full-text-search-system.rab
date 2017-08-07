@@ -1,0 +1,18 @@
+= MySQL・PostgreSQLだけで作る\n高速でリッチな全文検索システム
+
+: author
+   須藤功平
+: institution
+   株式会社クリアコード
+: content-source
+   db tech showcase Tokyo 2017
+: date
+   2017-09-07
+: allotted-time
+   50m
+: theme
+   .
+
+= 全文検索システム
+
+  * ...
