@@ -635,6 +635,7 @@ RDBMS経由で\n
   CREATE INDEX entries_full_text_search
     ON entries
     --「USING PGroonga」=「PGroongaを使う」
+    -- スコアーを使うために主キーを入れること！
     USING PGroonga (id, title, content);
 
 == スライドプロパティ
@@ -700,9 +701,9 @@ RDBMS経由で\n
 
   SELECT
       title,
-      -- pgroonga.score(テーブル名)で
+      -- pgroonga_score(テーブル名)で
       -- スコアーを取得
-      pgroonga.score(entries) AS score
+      pgroonga_score(entries) AS score
     FROM entries
     WHERE -- ...
     -- スコアーが高い順にソート
@@ -760,10 +761,10 @@ RDBMS経由で\n
   # coderay sql
 
   SELECT
-    pgroonga.highlight_html(
+    pgroonga_highlight_html(
       title,
       -- クエリーから対象キーワードを抽出
-      pgroonga.query_extract_keywords('検索 高速'))
+      pgroonga_query_extract_keywords('検索 高速'))
     FROM entries
     WHERE title &@~ '検索 高速' OR
           content &@~ '検索 高速';
@@ -840,10 +841,10 @@ RDBMS経由で\n
   # coderay sql
 
   SELECT
-    pgroonga.snippet_html(
+    pgroonga_snippet_html(
       content,
       -- クエリーから対象キーワードを抽出
-      pgroonga.query_extract_keywords('検索 高速'))
+      pgroonga_query_extract_keywords('検索 高速'))
     FROM entries
     WHERE title &@~ '検索 高速' OR
           content &@~ '検索 高速';
@@ -1127,7 +1128,7 @@ https://pgroonga.github.io/ja/how-to/auto-complete.html
   CREATE INDEX prefix_search ON terms
     USING PGroonga
     -- ...text_array_term_search...
-    (readings pgroonga.text_array_term_search_ops_v2);
+    (readings pgroonga_text_array_term_search_ops_v2);
 
 == スライドプロパティ
 
@@ -1140,9 +1141,7 @@ https://pgroonga.github.io/ja/how-to/auto-complete.html
   # coderay sql
 
   CREATE INDEX loose_search ON terms
-    USING PGroonga
-    -- ...text_full_text_search...
-    (term pgroonga.text_full_text_search_ops_v2)
+    USING PGroonga (term)
     -- 緩い全文検索用トークナイザー
     WITH (tokenizer='TokenBigramSplitSymbolAlphaDigit');
 
@@ -1412,7 +1411,7 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
     USING PGroonga
     -- ...text_term_search...
     -- termで完全一致検索をするため
-    (term pgroonga.text_term_search_ops_v2);
+    (term pgroonga_text_term_search_ops_v2);
 
 == スライドプロパティ
 
@@ -1424,7 +1423,7 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
 
   # coderay sql
 
-  SELECT pgroonga.query_expand(
+  SELECT pgroonga_query_expand(
     'synonyms', -- テーブル名
     'term', -- 展開対象のカラム名
     'terms', -- 対応する同義語配列のカラム名
@@ -1445,7 +1444,7 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
     WHERE
    -- title &@~ '居酒屋 ((刺身) OR (お造り))'になる
       title &@~
-        pgroonga.query_expand('synonyms',
+        pgroonga_query_expand('synonyms',
                               'term',
                               'terms',
                               '居酒屋 刺身');
@@ -1566,12 +1565,9 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
 
   CREATE INDEX entries_similar_search
     ON entries
-    USING PGroonga (
-      id,
-      -- ...text_full_text_search...
-      content pgroonga.text_full_text_search_ops_v2
-      -- TokenMecabを使うと精度向上
-    ) WITH (tokenizer='TokenMecab');
+    USING PGroonga (id, content)
+    -- TokenMecabを使うと精度向上
+    WITH (tokenizer='TokenMecab');
 
 == スライドプロパティ
 
