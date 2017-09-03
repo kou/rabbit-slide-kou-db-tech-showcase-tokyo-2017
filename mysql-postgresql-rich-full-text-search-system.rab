@@ -1259,8 +1259,6 @@ https://pgroonga.github.io/ja/how-to/auto-complete.html
 
    pgroonga
 
-TODO
-
 = 同義語展開
 
   * 同義語
@@ -1268,12 +1266,6 @@ TODO
     * 例：「刺身」と「お造り」
   * どの表記でもヒットして欲しい
     * 同義語展開→同義語すべてでOR検索
-
-== スライドプロパティ
-
-: groonga-product
-
-   pgroonga
 
 = 同義語展開\n実装方法
 
@@ -1284,13 +1276,90 @@ TODO
 (('tag:xx-small'))
 https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
 
+= 同義語展開：Mroonga\nテーブル定義
+
+  # coderay sql
+  CREATE TABLE synonyms (
+    term varchar(255),    -- 展開対象の語
+    synonym varchar(255), -- 同義語
+    INDEX (term)          -- 高速化と精度向上
+      COMMENT 'normalizer "NormalizerAuto"'
+  ) ENGINE=Mroonga DEFAULT CHARSET=utf8mb4;
+
 == スライドプロパティ
 
 : groonga-product
 
-   pgroonga
+   mroonga
 
-= 同義語展開\nテーブル定義
+= 同義語展開\nデータ例
+
+  # coderay sql
+  INSERT INTO synonyms
+  -- 「刺身」を「刺身 OR お造り」に展開
+    VALUES ('刺身', '刺身'),
+           ('刺身', 'お造り'),
+  -- 「お造り」を「お造り OR 刺身」に展開
+           ('お造り', 'お造り'),
+           ('お造り', '刺身');
+
+== スライドプロパティ
+
+: groonga-product
+
+   mroonga
+
+= 同義語展開\nデータ管理のポイント
+
+  * 普通のテーブルなので管理が楽
+    * 追加・削除・更新が楽
+    * ダンプ・リストアもいつも通り
+    * レプリケーションもいつも通り
+
+== スライドプロパティ
+
+: groonga-product
+
+   mroonga
+
+= 同義語展開：Mroonga\n確認方法
+
+  # coderay sql
+
+  SELECT mroonga_query_expand(
+    'synonyms',   -- テーブル名
+    'term',       -- 展開対象のカラム名
+    'synonym',    -- 対応する同義語のカラム名
+    '居酒屋 刺身' -- クエリー
+  );
+  -- '居酒屋 ((刺身) OR (お造り))'
+
+== スライドプロパティ
+
+: groonga-product
+
+   mroonga
+
+= 同義語展開：Mroonga\n検索方法
+
+  # coderay sql
+  SELECT title FROM entries
+    WHERE
+      MATCH (title)
+      -- '*D+ 居酒屋 OR ((刺身) OR (お造り))'になる
+      AGAINST (mroonga_query_expand('synonyms',
+                                    'term',
+                                    'synonym',
+                                    '*D+ 居酒屋 刺身')
+               IN BOOLEAN MODE);
+
+== スライドプロパティ
+
+: groonga-product
+
+   mroonga
+
+= 同義語展開：PGroonga\nテーブル定義
 
   # coderay sql
   CREATE TABLE synonyms (
@@ -1308,7 +1377,7 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
 
    pgroonga
 
-= 同義語展開\nデータ例
+= 同義語展開：PGroonga\nデータ例
 
   # coderay sql
   INSERT INTO synonyms
@@ -1323,7 +1392,7 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
 
    pgroonga
 
-= 同義語展開\nデータ管理のポイント
+= 同義語展開：PGroonga\nデータ管理のポイント
 
   * 普通のテーブルなので管理が楽
     * 追加・削除・更新が楽
@@ -1336,7 +1405,7 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
 
    pgroonga
 
-= 同義語展開\nインデックス定義
+= 同義語展開：PGroonga\nインデックス定義
 
   # coderay sql
   CREATE INDEX synonym_search ON synonyms
@@ -1351,7 +1420,7 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
 
    pgroonga
 
-= 同義語展開\n確認方法
+= 同義語展開：PGroonga\n確認方法
 
   # coderay sql
 
@@ -1369,17 +1438,17 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
 
    pgroonga
 
-= 同義語展開\n検索方法
+= 同義語展開：PGroonga\n検索方法
 
   # coderay sql
   SELECT title FROM entries
     WHERE
-   -- title &@~ '和食 OR ((刺身) OR (お造り))'になる
+   -- title &@~ '居酒屋 ((刺身) OR (お造り))'になる
       title &@~
         pgroonga.query_expand('synonyms',
                               'term',
                               'terms',
-                              '和食 OR 刺身');
+                              '居酒屋 刺身');
 
 == スライドプロパティ
 
@@ -1396,13 +1465,7 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
       →精度向上
     * メタデータ：タグ・行動履歴など
 
-== スライドプロパティ
-
-: groonga-product
-
-   mroonga
-
-= 類似文書検索\nインデックス定義
+= 類似文書検索：Mroonga\nインデックス定義
 
   # coderay sql
 
@@ -1420,7 +1483,7 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
 
    mroonga
 
-= 類似文書検索\n検索方法
+= 類似文書検索：Mroonga\n検索方法
 
   # coderay sql
 
@@ -1438,7 +1501,7 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
 
    mroonga
 
-= 類似文書検索\n結果例
+= 類似文書検索：Mroonga\n結果例
 
   クエリー：
      ...Groongaで高速全文検索！...
@@ -1497,22 +1560,7 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
 
    mroonga
 
-= 類似文書検索
-
-  * 検索クエリーは文書そのもの
-    * キーワードではない
-  * 関連エントリーの提示に使える
-    * メタデータがあるなら組み合わせる\n
-      →精度向上
-    * メタデータ：タグ・行動履歴など
-
-== スライドプロパティ
-
-: groonga-product
-
-   pgroonga
-
-= 類似文書検索\nインデックス定義
+= 類似文書検索：PGroonga\nインデックス定義
 
   # coderay sql
 
@@ -1520,7 +1568,7 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
     ON entries
     USING PGroonga (
       id,
-      -- pg...v2の指定がポイント
+      -- ...text_full_text_search...
       content pgroonga.text_full_text_search_ops_v2
       -- TokenMecabを使うと精度向上
     ) WITH (tokenizer='TokenMecab');
@@ -1531,16 +1579,16 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
 
    pgroonga
 
-= 類似文書検索\n検索方法
+= 類似文書検索：PGroonga\n検索方法
 
   # coderay sql
 
   SELECT title
     FROM entries
     WHERE
-      -- &~?で類似文書検索
+      -- &@*で類似文書検索
       -- 既存文書の内容をそのまま指定
-      content &~?
+      content &@*
         '...Groongaで高速全文検索！...';
 
 == スライドプロパティ
@@ -1549,7 +1597,7 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
 
    pgroonga
 
-= 類似文書検索\n結果例
+= 類似文書検索：PGroonga\n結果例
 
   クエリー：
      ...Groongaで高速全文検索！...
