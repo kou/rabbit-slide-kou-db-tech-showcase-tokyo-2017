@@ -493,6 +493,7 @@ RDBMS経由で\n
   * キーワードハイライト
   * 周辺テキスト表示
   * 入力補完
+  * 同義語展開
   * 関連文書の表示
 
 = 全文検索
@@ -1612,7 +1613,7 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
   * 全文検索
   * キーワードハイライト
   * 周辺テキスト表示
-  * 入力補完
+  * 入力補完・同義語展開
   * 関連文書の表示
 
 = 全文検索システムの実装\n次の一歩
