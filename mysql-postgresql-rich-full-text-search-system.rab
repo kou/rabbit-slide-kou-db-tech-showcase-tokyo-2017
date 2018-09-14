@@ -127,7 +127,7 @@ RDBMS経由で\n
 
   * 組込可能な全文検索エンジン
     * MySQL・MariaDBに組込→Mroonga
-    * PostgreSQLに組込→PGoonga
+    * PostgreSQLに組込→PGroonga
   * 全文検索サーバーとして\n
     単独でも使用可能
     * RDBMSと全文検索サーバーを併用\n
